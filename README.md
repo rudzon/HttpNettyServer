@@ -55,3 +55,8 @@ RedirectReport READ:`StatusHandler` READ/WRITE: `RedirectHandler`
 
 RequestReport READ:`StatusHandler` READ/WRITE: `StatisticsHandler`
 
+Screenshots
+-----------
+![alt tag](https://dl.dropboxusercontent.com/u/10930742/Job/hamsters/status.PNG)
+![alt tag](https://dl.dropboxusercontent.com/u/10930742/Job/hamsters/ab.png)
+
