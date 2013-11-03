@@ -9,7 +9,7 @@ import io.netty.channel.ChannelPromise;
 import io.netty.util.AttributeKey;
 
 /**
- * Handler to count received/sent bytes  and speed by hand
+ * Handler to count received/sent bytes and speed by hand
  *
  * @author rudzon
  */
@@ -45,13 +45,16 @@ public class RakeHandler extends ChannelDuplexHandler {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         LastAccessRecord lastAccessRecord = ctx.channel().attr(accessKey).get();
         long sessionDuration = System.currentTimeMillis() - lastAccessRecord.getTimestamp();
-        long speed = ((receivedBytes + sentBytes)  * 1000) / 
-                (sessionDuration == 0 ? 1 : sessionDuration);
+        long speed = ((receivedBytes + sentBytes) * 1000)
+                / (sessionDuration == 0 ? 1 : sessionDuration);
         lastAccessRecord.setBytesReceived(receivedBytes);
         lastAccessRecord.setBytesSent(sentBytes);
         lastAccessRecord.setSpeed(speed);
         ctx.channel().attr(accessKey).set(lastAccessRecord);
-        LastAccessReport.push(lastAccessRecord);
+        // when connection is dropped the request does not count as processed
+        if (lastAccessRecord.getUri() != null) {
+            LastAccessReport.push(lastAccessRecord);
+        }
         super.channelInactive(ctx);
     }
 }
