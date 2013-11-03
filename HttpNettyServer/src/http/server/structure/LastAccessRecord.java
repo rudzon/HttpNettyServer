@@ -11,13 +11,13 @@ public class LastAccessRecord {
     private String uri;
     private long lastRequestTime;
     private long bytesSent;
-    private AtomicLong bytesReceived;
+    private long bytesReceived;
     private long speed;
 
     public LastAccessRecord(){
         this.lastRequestTime = System.currentTimeMillis();
         this.bytesSent = 0;
-        this.bytesReceived = new AtomicLong(0);
+        this.bytesReceived = 0;
         this.speed = 0;
     }
 
@@ -28,7 +28,7 @@ public class LastAccessRecord {
         this.uri = uri;
         this.lastRequestTime = lastRequestTime;
         this.bytesSent = bytesSent;
-        this.bytesReceived.set(bytesReceived);
+        this.bytesReceived = 0;
         this.speed = speed;
     }
        
@@ -65,11 +65,11 @@ public class LastAccessRecord {
     }
 
     public long getBytesReceived() {
-        return bytesReceived.get();
+        return bytesReceived;
     }
 
     public void setBytesReceived(long bytesReceived) {
-        this.bytesReceived.set(bytesReceived);
+        this.bytesReceived = bytesReceived;
     }
 
     public long getSpeed() {
