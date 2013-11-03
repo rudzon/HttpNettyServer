@@ -22,6 +22,7 @@ public class RequestReport {
         if(requestRecord != null){
             requestRecord.incrementRequestCount();
             requestRecord.setLastRequestTime(System.currentTimeMillis());
+            requestMap.replace(ip, requestRecord);
         }else{
             requestMap.put(ip, new RequestRecord(ip, 1, System.currentTimeMillis()));
         }
