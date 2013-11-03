@@ -6,6 +6,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import io.netty.util.AttributeKey;
 
 /**
  * Handler to count received/sent bytes  and speed by hand
@@ -16,10 +17,10 @@ public class RakeHandler extends ChannelDuplexHandler {
 
     private long receivedBytes;
     private long sentBytes;
-    LastAccessRecord lastAccessRecord;
+    private AttributeKey<LastAccessRecord> accessKey;
 
-    public RakeHandler(LastAccessRecord lastAccessRecord) {
-        this.lastAccessRecord = lastAccessRecord;
+    public RakeHandler(AttributeKey<LastAccessRecord> accessKey) {
+        this.accessKey = accessKey;
     }
 
     @Override
@@ -42,12 +43,14 @@ public class RakeHandler extends ChannelDuplexHandler {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        LastAccessRecord lastAccessRecord = ctx.channel().attr(accessKey).get();
         long sessionDuration = System.currentTimeMillis() - lastAccessRecord.getTimestamp();
         long speed = ((receivedBytes + sentBytes)  * 1000) / 
                 (sessionDuration == 0 ? 1 : sessionDuration);
         lastAccessRecord.setBytesReceived(receivedBytes);
         lastAccessRecord.setBytesSent(sentBytes);
         lastAccessRecord.setSpeed(speed);
+        ctx.channel().attr(accessKey).set(lastAccessRecord);
         LastAccessReport.push(lastAccessRecord);
         super.channelInactive(ctx);
     }

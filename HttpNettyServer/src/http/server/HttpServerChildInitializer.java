@@ -11,6 +11,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.util.AttributeKey;
 
 
 /**
@@ -19,17 +20,15 @@ import io.netty.handler.codec.http.HttpServerCodec;
  */
 public class HttpServerChildInitializer extends ChannelInitializer<Channel> {
 
+    private static AttributeKey<LastAccessRecord> accessRecord = new AttributeKey<>("accessRecord");
+    
     @Override
     protected void initChannel(Channel ch) throws Exception {
-        ChannelPipeline pipeline = ch.pipeline();
-        LastAccessRecord lastAccessRecord = new LastAccessRecord();
-        
-        pipeline.addLast("rake-handler", new RakeHandler(lastAccessRecord));
+        ChannelPipeline pipeline = ch.pipeline();        
+        ch.attr(accessRecord).set(new LastAccessRecord());
+        pipeline.addLast("rake-handler", new RakeHandler(accessRecord));
         pipeline.addLast("codec", new HttpServerCodec());
-        // StatisticsHandler constructor zero param doesn't matter actually, 
-        // cant get trafficCounter to work properly
-        pipeline.addLast("statistics-handler", new StatisticsHandler(0, lastAccessRecord));
-        //AbstractTrafficShapingHandler.DEFAULT_CHECK_INTERVAL));
+        pipeline.addLast("statistics-handler", new StatisticsHandler(0, accessRecord));
         pipeline.addLast("hello-handler", new HelloHandler());
         pipeline.addLast("redirect-handler", new RedirectHandler());
         pipeline.addLast("status-handler", new StatusHandler());
